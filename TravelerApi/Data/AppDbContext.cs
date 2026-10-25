@@ -33,6 +33,7 @@ public sealed class AppDbContext(DbContextOptions<AppDbContext> options) : DbCon
             entity.HasKey(x => x.Id);
             entity.Property(x => x.Id).HasColumnName("id");
             entity.Property(x => x.TravelPlanId).HasColumnName("travel_plan_id");
+            entity.Property(x => x.Version).HasColumnName("version");
             entity.Property(x => x.Name).HasColumnName("name").HasMaxLength(200).IsRequired();
             entity.Property(x => x.Address).HasColumnName("address");
             entity.Property(x => x.Latitude).HasColumnName("latitude").HasPrecision(10, 6);

@@ -24,4 +24,8 @@ public class CreateLocationRequest : IValidatableObject
     }
 }
 
-public sealed class UpdateLocationRequest : CreateLocationRequest;
+public sealed class UpdateLocationRequest : CreateLocationRequest
+{
+    [Range(1, int.MaxValue)]
+    public int Version { get; set; }
+}

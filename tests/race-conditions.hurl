@@ -61,6 +61,8 @@ Content-Type: application/json
 HTTP 201
 [Captures]
 location_a_order: jsonpath "$.visit_order"
+location_a_id: jsonpath "$.id"
+location_a_version: jsonpath "$.version"
 
 POST {{host}}/api/travel-plans/{{race_plan_id}}/locations
 Content-Type: application/json
@@ -94,7 +96,38 @@ jsonpath "$.locations[0].visit_order" == 1
 jsonpath "$.locations[1].visit_order" == 2
 jsonpath "$.locations[2].visit_order" == 3
 
-# Strategy 3: Cascade Delete Race Condition Test
+# Strategy 3: Concurrent location update protection
+PUT {{host}}/api/locations/{{location_a_id}}
+Content-Type: application/json
+{
+  "name": "Location A Updated",
+  "budget": 125.00,
+  "version": {{location_a_version}}
+}
+
+HTTP 200
+[Captures]
+location_a_updated_version: jsonpath "$.version"
+
+[Asserts]
+jsonpath "$.version" == 2
+jsonpath "$.budget" == 125.00
+
+# A stale update must not overwrite the successful update
+PUT {{host}}/api/locations/{{location_a_id}}
+Content-Type: application/json
+{
+  "name": "Stale Location A Update",
+  "notes": "This update must fail",
+  "version": {{location_a_version}}
+}
+
+HTTP 409
+[Asserts]
+jsonpath "$.error" contains "Conflict"
+jsonpath "$.current_version" == 2
+
+# Strategy 4: Cascade Delete Race Condition Test
 DELETE {{host}}/api/travel-plans/{{race_plan_id}}
 
 HTTP 204

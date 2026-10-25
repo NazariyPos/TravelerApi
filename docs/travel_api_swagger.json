@@ -98,6 +98,9 @@
           "404": {
             "$ref": "#/components/responses/NotFound"
           },
+          "409": {
+            "$ref": "#/components/responses/ConflictError"
+          },
           "500": {
             "$ref": "#/components/responses/InternalError"
           }
@@ -479,7 +482,7 @@
       },
       "Location": {
         "type": "object",
-        "required": ["id", "travel_plan_id", "name", "visit_order", "created_at"],
+        "required": ["id", "travel_plan_id", "version", "name", "visit_order", "created_at"],
         "properties": {
           "id": {
             "type": "string",
@@ -490,6 +493,11 @@
             "type": "string",
             "format": "uuid",
             "description": "ID of the travel plan this location belongs to"
+          },
+          "version": {
+            "type": "integer",
+            "minimum": 1,
+            "description": "Version number for optimistic locking"
           },
           "name": {
             "type": "string",
@@ -613,6 +621,7 @@
       },
       "UpdateLocationRequest": {
         "type": "object",
+        "required": ["version"],
         "properties": {
           "name": {
             "type": "string",
@@ -661,6 +670,11 @@
             "type": "string",
             "nullable": true,
             "description": "Additional notes"
+          },
+          "version": {
+            "type": "integer",
+            "minimum": 1,
+            "description": "Current version number for optimistic locking"
           }
         }
       },
@@ -721,7 +735,7 @@
       },
       "ConflictResponse": {
         "type": "object",
-        "required": ["error", "currentVersion"],
+        "required": ["error", "current_version"],
         "properties": {
           "error": {
             "type": "string",
@@ -827,7 +841,7 @@
                 "summary": "Version conflict",
                 "value": {
                   "error": "Conflict: Travel plan was modified by another user",
-                  "currentVersion": 5,
+                  "current_version": 5,
                   "message": "Please refresh and try again"
                 }
               }

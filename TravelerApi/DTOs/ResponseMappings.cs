@@ -19,7 +19,7 @@ public static class ResponseMappings
 
     public static object ToResponse(this Location location) => new
     {
-        location.Id, location.TravelPlanId, location.Name, location.Address, location.Latitude,
+        location.Id, location.TravelPlanId, location.Version, location.Name, location.Address, location.Latitude,
         location.Longitude, location.VisitOrder, location.ArrivalDate, location.DepartureDate,
         location.Budget, location.Notes, location.CreatedAt
     };

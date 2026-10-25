@@ -22,7 +22,7 @@ public sealed class LocationsController(AppDbContext db) : ControllerBase
             .MaxAsync(x => (int?)x.VisitOrder, cancellationToken) ?? 0) + 1;
         var location = new Location
         {
-            Id = Guid.NewGuid(), TravelPlanId = planId, Name = request.Name!.Trim(),
+            Id = Guid.NewGuid(), TravelPlanId = planId, Version = 1, Name = request.Name!.Trim(),
             Address = request.Address, Latitude = request.Latitude, Longitude = request.Longitude,
             VisitOrder = nextOrder, ArrivalDate = request.ArrivalDate,
             DepartureDate = request.DepartureDate, Budget = request.Budget, Notes = request.Notes,
@@ -37,18 +37,39 @@ public sealed class LocationsController(AppDbContext db) : ControllerBase
     [HttpPut("api/locations/{id:guid}")]
     public async Task<IActionResult> Update(Guid id, UpdateLocationRequest request, CancellationToken cancellationToken)
     {
-        var location = await db.Locations.FindAsync([id], cancellationToken);
-        if (location is null) return NotFound(new { error = "Location not found" });
-        location.Name = request.Name?.Trim() ?? location.Name;
-        location.Address = request.Address;
-        location.Latitude = request.Latitude;
-        location.Longitude = request.Longitude;
-        location.ArrivalDate = request.ArrivalDate;
-        location.DepartureDate = request.DepartureDate;
-        location.Budget = request.Budget;
-        location.Notes = request.Notes;
-        await db.SaveChangesAsync(cancellationToken);
-        return Ok(location.ToResponse());
+        var newVersion = request.Version + 1;
+        var affected = await db.Locations
+            .Where(x => x.Id == id && x.Version == request.Version)
+            .ExecuteUpdateAsync(setters => setters
+                .SetProperty(x => x.Name, request.Name!.Trim())
+                .SetProperty(x => x.Address, request.Address)
+                .SetProperty(x => x.Latitude, request.Latitude)
+                .SetProperty(x => x.Longitude, request.Longitude)
+                .SetProperty(x => x.ArrivalDate, request.ArrivalDate)
+                .SetProperty(x => x.DepartureDate, request.DepartureDate)
+                .SetProperty(x => x.Budget, request.Budget)
+                .SetProperty(x => x.Notes, request.Notes)
+                .SetProperty(x => x.Version, newVersion), cancellationToken);
+
+        if (affected == 0)
+        {
+            var currentVersion = await db.Locations.AsNoTracking()
+                .Where(x => x.Id == id)
+                .Select(x => (int?)x.Version)
+                .FirstOrDefaultAsync(cancellationToken);
+
+            return currentVersion is null
+                ? NotFound(new { error = "Location not found" })
+                : Conflict(new
+                {
+                    error = "Conflict: location was modified by another user",
+                    current_version = currentVersion
+                });
+        }
+
+        var updated = await db.Locations.AsNoTracking()
+            .FirstAsync(x => x.Id == id, cancellationToken);
+        return Ok(updated.ToResponse());
     }
 
     [HttpDelete("api/locations/{id:guid}")]

@@ -4,6 +4,7 @@ public sealed class Location
 {
     public Guid Id { get; set; }
     public Guid TravelPlanId { get; set; }
+    public int Version { get; set; }
     public string Name { get; set; } = string.Empty;
     public string? Address { get; set; }
     public decimal? Latitude { get; set; }

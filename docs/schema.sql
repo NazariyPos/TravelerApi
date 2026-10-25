@@ -23,6 +23,7 @@ CREATE TABLE travel_plans (
 CREATE TABLE locations (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     travel_plan_id UUID NOT NULL REFERENCES travel_plans(id) ON DELETE CASCADE,
+    version INTEGER NOT NULL DEFAULT 1 CHECK (version > 0),
     name VARCHAR(200) NOT NULL CHECK (LENGTH(TRIM(name)) > 0),
     address TEXT,
     latitude DECIMAL(10, 6),
