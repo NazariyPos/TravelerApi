@@ -1,5 +1,5 @@
--- Enable UUID generation
-CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+-- Enable UUID generation used by gen_random_uuid()
+CREATE EXTENSION IF NOT EXISTS "pgcrypto";
 
 -- Travel Plans (main entity)
 CREATE TABLE travel_plans (
@@ -43,7 +43,7 @@ CREATE TABLE locations (
 
 -- Trigger to auto-assign visit_order for new locations
 CREATE OR REPLACE FUNCTION assign_location_order()
-RETURNS TRIGGER AS $
+RETURNS TRIGGER AS $$
 BEGIN
     -- If visit_order not provided, auto-assign next available
     IF NEW.visit_order IS NULL THEN
@@ -54,7 +54,7 @@ BEGIN
     END IF;
     RETURN NEW;
 END;
-$ language 'plpgsql';
+$$ LANGUAGE plpgsql;
 
 CREATE TRIGGER auto_assign_location_order
     BEFORE INSERT ON locations
