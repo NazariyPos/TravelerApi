@@ -36,7 +36,9 @@ import {
   createTravelPlan,
   getTravelPlan,
   updateTravelPlan,
+  expectTravelPlanConflict,
   deleteTravelPlan,
+  verifyPlanDeleted,
   thinkTime,
 } from '../utils/api-client.js';
 import {
@@ -136,12 +138,7 @@ export default function () {
   // --------------------------------------------------
   // Намагаємось оновити зі старою версією - має повернути 409 Conflict
   const conflictUpdate = generateTravelPlanUpdate(initialVersion);
-  const conflictResult = updateTravelPlan(planId, conflictUpdate);
-  
-  // Це очікувана поведінка - конфлікт версій
-  if (conflictResult && conflictResult.conflict) {
-    // Успішно виявлено конфлікт
-  }
+  expectTravelPlanConflict(planId, conflictUpdate);
 
   thinkTime(0.5, 1);
 
@@ -161,7 +158,7 @@ export default function () {
   // 6. ПЕРЕВІРКА ВИДАЛЕННЯ (очікується 404)
   // --------------------------------------------------
   // Намагаємось отримати видалений план - має повернути 404
-  getTravelPlan(planId); // Функція сама перевірить 404
+  verifyPlanDeleted(planId);
 
   // Пауза перед наступною ітерацією
   sleep(1);

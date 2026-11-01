@@ -244,6 +244,26 @@ export function updateTravelPlan(planId, updateData) {
 }
 
 /**
+ * Перевіряє очікуваний конфлікт версії travel plan
+ * @param {string} planId - ID плану
+ * @param {object} updateData - Дані з неактуальною версією
+ * @returns {boolean} true якщо API повернув 409 Conflict
+ */
+export function expectTravelPlanConflict(planId, updateData) {
+  const response = makeRequest(
+    'PUT',
+    ENDPOINTS.TRAVEL_PLAN_BY_ID(planId),
+    updateData,
+    409,
+    'write'
+  );
+
+  return check(response, {
+    'stale update rejected with 409': (r) => r.status === 409,
+  });
+}
+
+/**
  * Видаляє travel plan
  * @param {string} planId - ID плану
  * @returns {boolean} true якщо успішно видалено
