@@ -53,9 +53,9 @@ import {
 export const options = {
   // Профіль навантаження: поступове зростання → стабільний стан → зменшення
   stages: [
-    { duration: '2m', target: 50 },  // Ramp-up: 0 → 50 VUs за 2 хвилини
-    { duration: '5m', target: 50 },  // Steady: 50 VUs протягом 5 хвилин
-    { duration: '2m', target: 0 },   // Ramp-down: 50 → 0 VUs за 2 хвилини
+    { duration: '2m', target: 1500 },  // Ramp-up: 0 → 1500 VUs за 2 хвилини
+    { duration: '5m', target: 1500 },  // Steady: 1500 VUs протягом 5 хвилин
+    { duration: '2m', target: 0 },   // Ramp-down: 1500 → 0 VUs за 2 хвилини
   ],
 
   // Пороги продуктивності
@@ -171,7 +171,7 @@ export default function () {
 export function setup() {
   console.log('='.repeat(80));
   console.log('Starting CRUD Load Test');
-  console.log('Target: 50 concurrent users');
+  console.log('Target: 1500 concurrent users');
   console.log('Duration: 9 minutes (2m ramp-up + 5m steady + 2m ramp-down)');
   console.log('='.repeat(80));
 }
